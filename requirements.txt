@@ -1,0 +1,7 @@
+Flask==2.3.*
+gunicorn
+pytest
+pytest-cov
+prometheus-client
+flake8
+bandit
