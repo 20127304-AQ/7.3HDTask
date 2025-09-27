@@ -44,11 +44,11 @@ pipeline {
             steps {
                 withCredentials([string(credentialsId: env.SONAR_TOKEN_CRED, variable: 'SONAR_TOKEN')]) {
                     bat """
-                        docker run --rm -v "%CD%:/usr/src" -w /usr/src sonarsource/sonar-scanner-cli ^
+                        docker run --rm -v "%CD%:/usr/src" -w /usr/src -e SONAR_TOKEN=%SONAR_TOKEN% sonarsource/sonar-scanner-cli ^
                           -Dsonar.projectKey=7_3_hd_task ^
                           -Dsonar.sources=. ^
                           -Dsonar.host.url=%SONAR_HOST_URL% ^
-                          -Dsonar.login=%SONAR_TOKEN% ^
+                          -Dsonar.login=\$SONAR_TOKEN ^
                           -Dsonar.exclusions=**/tests/**,**/venv/**,**/__pycache__/**
                     """
                 }
