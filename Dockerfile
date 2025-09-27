@@ -10,5 +10,4 @@ COPY . .
 ENV PORT=5000
 EXPOSE 5000
 
-# Use gunicorn to run the flask app
-CMD ["gunicorn", "--bind", "0.0.0.0:5000", "app:app"]
+CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--workers", "3", "app:app"]
