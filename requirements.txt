@@ -1,7 +1,4 @@
-Flask==2.3.*
-gunicorn
-pytest
-pytest-cov
-prometheus-client
-flake8
-bandit
+Flask==2.2.5
+prometheus_client==0.16.0
+gunicorn==21.2.0
+pytest==7.4.0
