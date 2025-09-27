@@ -95,16 +95,18 @@ pipeline {
         stage('Deploy stage') {
             steps {
                 script {
-                    // Stop old container if exists
-                    bat 'docker rm -f todo-app || exit 0'
+                    withCredentials([usernamePassword(credentialsId: env.DOCKER_CRED, usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                        // Stop old container if exists
+                        bat 'docker rm -f todo-app || exit 0'
 
-                    // Run docker-compose with env vars passed explicitly
-                    withEnv(["DOCKER_USER=${env.DOCKER_USER}", "BUILD_NUMBER=${env.BUILD_NUMBER}"]) {
-                        bat 'docker-compose up -d --force-recreate todo-app'
+                        // Deploy app
+                        withEnv(["DOCKER_USER=${DOCKER_USER}", "BUILD_NUMBER=${BUILD_NUMBER}"]) {
+                            bat 'docker-compose up -d --force-recreate todo-app'
+                        }
+
+                        // Verify container is running
+                        bat 'docker ps -a'
                     }
-
-                    // Verify container
-                    bat 'docker ps -a'
                 }
             }
         }
