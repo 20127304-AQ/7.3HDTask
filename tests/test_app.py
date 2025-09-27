@@ -1,17 +1,18 @@
 from app import app
-import json
 
 def test_index():
     client = app.test_client()
     resp = client.get('/')
     assert resp.status_code == 200
-    assert resp.get_json()["message"] == "Hello from Flask TODO App!"
+    data = resp.get_json()
+    assert data["message"] == "Hello from Flask TODO App!"
 
 def test_health():
     client = app.test_client()
     resp = client.get('/health')
     assert resp.status_code == 200
-    assert resp.get_json()["status"] == "ok"
+    data = resp.get_json()
+    assert data["status"] == "ok"
 
 def test_metrics():
     client = app.test_client()

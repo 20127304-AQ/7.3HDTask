@@ -51,7 +51,7 @@ pipeline {
             }
         }
 
-        stage('Security') {
+        stage('Security stage') {
             steps {
                 withCredentials([usernamePassword(credentialsId: env.DOCKER_CRED, usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
                     bat """
