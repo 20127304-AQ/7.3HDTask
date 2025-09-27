@@ -51,16 +51,39 @@ pipeline {
             }
         }
 
-        stage('Security stage (Trivy)') {
+        stage('Security') {
             steps {
                 withCredentials([usernamePassword(credentialsId: env.DOCKER_CRED, usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
                     bat """
+                        REM Scan image with Trivy and export JSON
                         docker run --rm -v //var/run/docker.sock:/var/run/docker.sock aquasec/trivy image ^
-                          --severity CRITICAL,HIGH --no-progress %DOCKER_USER%/7.3hdtask:%BUILD_NUMBER% || exit 0
+                          --severity CRITICAL,HIGH --format json --output trivy_report.json %DOCKER_USER%/7.3hdtask:%BUILD_NUMBER%
                     """
+
+                    bat """
+                        REM Parse JSON to list vulnerabilities (name, severity, fix)
+                        python - <<END
+        import json
+
+        with open("trivy_report.json") as f:
+            report = json.load(f)
+
+        if 'Results' in report:
+            for result in report['Results']:
+                if 'Vulnerabilities' in result:
+                    for vuln in result['Vulnerabilities']:
+                        name = vuln.get('VulnerabilityID', 'N/A')
+                        severity = vuln.get('Severity', 'N/A')
+                        fix = vuln.get('FixedVersion', 'Not available')
+                        print(f"Issue: {name}, Severity: {severity}, Fixed Version: {fix}")
+        END
+                    """
+
+                    archiveArtifacts artifacts: 'trivy_report.json', allowEmptyArchive: true
                 }
             }
         }
+
 
         stage('Archive artifacts') {
             steps {
