@@ -91,6 +91,25 @@ pipeline {
                 archiveArtifacts artifacts: 'results/**', allowEmptyArchive: true
             }
         }
+
+        stage('Deploy stage') {
+            steps {
+                script {
+                    // Clean up old containers
+                    bat 'docker-compose down || exit 0'
+
+                    // Deploy new container with updated image
+                    bat '''
+                        set DOCKER_USER=%DOCKER_USER%
+                        set BUILD_NUMBER=%BUILD_NUMBER%
+                        docker-compose up -d --force-recreate
+                    '''
+
+                    // Verify container is running
+                    bat 'docker ps -a'
+                }
+            }
+        }
     }
 
     post {
