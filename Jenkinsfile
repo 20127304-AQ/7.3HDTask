@@ -51,39 +51,34 @@ pipeline {
             }
         }
 
-        stage('Security') {
+        stage('Security stage') {
             steps {
                 withCredentials([usernamePassword(credentialsId: env.DOCKER_CRED, usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
                     bat """
-                        REM Scan image with Trivy and export JSON
-                        docker run --rm -v //var/run/docker.sock:/var/run/docker.sock aquasec/trivy image ^
-                          --severity CRITICAL,HIGH --format json --output trivy_report.json %DOCKER_USER%/7.3hdtask:%BUILD_NUMBER%
-                    """
+        REM Scan Docker image with Trivy and export JSON
+        docker run --rm -v //var/run/docker.sock:/var/run/docker.sock aquasec/trivy image ^
+          --severity CRITICAL,HIGH --format json --output trivy_report.json %DOCKER_USER%/7.3hdtask:%BUILD_NUMBER%
 
-                    bat """
-                        REM Parse JSON to list vulnerabilities (name, severity, fix)
-                        python - <<END
-        import json
+        REM Parse JSON to list vulnerabilities using Python (Windows-compatible)
+        echo import json > parse_trivy.py
+        echo with open("trivy_report.json") as f: >> parse_trivy.py
+        echo     report = json.load(f) >> parse_trivy.py
+        echo if 'Results' in report: >> parse_trivy.py
+        echo     for result in report['Results']: >> parse_trivy.py
+        echo         if 'Vulnerabilities' in result: >> parse_trivy.py
+        echo             for vuln in result['Vulnerabilities']: >> parse_trivy.py
+        echo                 name = vuln.get('VulnerabilityID', 'N/A') >> parse_trivy.py
+        echo                 severity = vuln.get('Severity', 'N/A') >> parse_trivy.py
+        echo                 fix = vuln.get('FixedVersion', 'Not available') >> parse_trivy.py
+        echo                 print(f"Issue: {name}, Severity: {severity}, Fixed Version: {fix}") >> parse_trivy.py
 
-        with open("trivy_report.json") as f:
-            report = json.load(f)
-
-        if 'Results' in report:
-            for result in report['Results']:
-                if 'Vulnerabilities' in result:
-                    for vuln in result['Vulnerabilities']:
-                        name = vuln.get('VulnerabilityID', 'N/A')
-                        severity = vuln.get('Severity', 'N/A')
-                        fix = vuln.get('FixedVersion', 'Not available')
-                        print(f"Issue: {name}, Severity: {severity}, Fixed Version: {fix}")
-        END
-                    """
-
+        python parse_trivy.py
+        del parse_trivy.py
+        """
                     archiveArtifacts artifacts: 'trivy_report.json', allowEmptyArchive: true
                 }
             }
         }
-
 
         stage('Archive artifacts') {
             steps {
