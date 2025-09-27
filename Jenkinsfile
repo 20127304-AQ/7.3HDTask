@@ -14,7 +14,7 @@ pipeline {
             }
         }
 
-        stage('Build Docker image') {
+        stage('Build stage') {
             steps {
                 script {
                     withCredentials([usernamePassword(credentialsId: env.DOCKER_CRED, usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
@@ -26,7 +26,7 @@ pipeline {
             }
         }
 
-        stage('Unit Tests') {
+        stage('Test stage') {
             steps {
                 bat '''
                     python -m venv venv
@@ -51,7 +51,7 @@ pipeline {
             }
         }
 
-        stage('Security Scan (Trivy)') {
+        stage('Security stage (Trivy)') {
             steps {
                 withCredentials([usernamePassword(credentialsId: env.DOCKER_CRED, usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
                     bat """
