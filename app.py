@@ -1,13 +1,25 @@
 from flask import Flask, jsonify
 from prometheus_client import Counter, generate_latest, CONTENT_TYPE_LATEST
+from routes.todos import todos_bp
+from routes.users import users_bp
 
 app = Flask(__name__)
-REQUESTS = Counter('http_requests_total','Total HTTP requests')
+
+# Metrics
+REQUESTS = Counter('http_requests_total', 'Total HTTP requests')
+TODO_OPERATIONS = Counter('todo_operations_total', 'Total TODO CRUD operations', ['operation'])
+
+# Register blueprints
+app.register_blueprint(todos_bp, url_prefix='/todos')
+app.register_blueprint(users_bp, url_prefix='/users')
+
+@app.before_request
+def before_request():
+    REQUESTS.inc()
 
 @app.route('/')
 def index():
-    REQUESTS.inc()
-    return jsonify(message="Hello from Flask!")
+    return jsonify(message="Hello from Flask TODO App!")
 
 @app.route('/health')
 def health():
