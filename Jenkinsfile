@@ -49,14 +49,14 @@ pipeline {
       steps {
         withCredentials([string(credentialsId: env.SONAR_TOKEN_CRED, variable: 'SONAR_TOKEN')]) {
           // run sonar-scanner via docker image to avoid installing it on agent
-          sh """
+          sh '''
             docker run --rm -v "$(pwd)":/usr/src -w /usr/src sonarsource/sonar-scanner-cli \
               -Dsonar.projectKey=7_3_hd_task \
               -Dsonar.sources=. \
               -Dsonar.host.url=${SONAR_HOST_URL} \
               -Dsonar.login=$SONAR_TOKEN \
               -Dsonar.exclusions=**/tests/**,**/.venv/**,**/__pycache__/**
-          """
+          '''
         }
       }
     }
@@ -67,10 +67,10 @@ pipeline {
           // Trivy via Docker (no token required for basic scans)
           withCredentials([usernamePassword(credentialsId: env.DOCKER_CRED, usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
             // ensure image exists locally; if not, docker pull might be required
-            sh """
+            sh '''
               docker run --rm -v /var/run/docker.sock:/var/run/docker.sock aquasec/trivy image \
                 --severity CRITICAL,HIGH --no-progress ${DOCKER_USER}/7.3hdtask:${BUILD_NUMBER} || true
-            """
+            '''
           }
         }
       }
