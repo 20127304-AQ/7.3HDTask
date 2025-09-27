@@ -97,14 +97,14 @@ pipeline {
                 script {
                     withCredentials([usernamePassword(credentialsId: env.DOCKER_CRED, usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
                         // Stop old container if exists
-                        bat 'docker rm -f todo-app || exit 0'
+                        bat 'docker rm -f hdtask_app || exit 0'
 
-                        // Deploy app
+                        // Deploy new version
                         withEnv(["DOCKER_USER=${DOCKER_USER}", "BUILD_NUMBER=${BUILD_NUMBER}"]) {
-                            bat 'docker-compose up -d --force-recreate todo-app'
+                            bat 'docker-compose up -d --force-recreate hdtask_app'
                         }
 
-                        // Verify container is running
+                        // Verify
                         bat 'docker ps -a'
                     }
                 }

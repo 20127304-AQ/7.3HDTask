@@ -1,8 +1,9 @@
+version: '3.8'
+
 services:
-  todo-app:
-    image: "${DOCKER_USER}/7.3hdtask:${BUILD_NUMBER}"
-    container_name: todo-app
+  hdtask_app:
+    image: anquoc/7.3hdtask:${BUILD_NUMBER}
+    container_name: hdtask_app
     ports:
       - "5000:5000"
-    environment:
-      - PORT=5000
+    restart: always
