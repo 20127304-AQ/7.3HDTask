@@ -48,7 +48,6 @@ pipeline {
                           -Dsonar.projectKey=7_3_hd_task ^
                           -Dsonar.sources=. ^
                           -Dsonar.host.url=%SONAR_HOST_URL% ^
-                          -Dsonar.login=\$SONAR_TOKEN ^
                           -Dsonar.exclusions=**/tests/**,**/venv/**,**/__pycache__/**
                     """
                 }
