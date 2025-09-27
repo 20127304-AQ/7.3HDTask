@@ -95,21 +95,20 @@ pipeline {
         stage('Deploy stage') {
             steps {
                 script {
-                    // Clean up old containers
-                    bat 'docker-compose down || exit 0'
+                    // Stop old container if exists
+                    bat 'docker rm -f todo-app || exit 0'
 
-                    // Deploy new container with updated image
-                    bat '''
-                        set DOCKER_USER=%DOCKER_USER%
-                        set BUILD_NUMBER=%BUILD_NUMBER%
-                        docker-compose up -d --force-recreate
-                    '''
+                    // Run docker-compose with env vars passed explicitly
+                    withEnv(["DOCKER_USER=${env.DOCKER_USER}", "BUILD_NUMBER=${env.BUILD_NUMBER}"]) {
+                        bat 'docker-compose up -d --force-recreate todo-app'
+                    }
 
-                    // Verify container is running
+                    // Verify container
                     bat 'docker ps -a'
                 }
             }
         }
+
     }
 
     post {
