@@ -4,7 +4,7 @@ pipeline {
     environment {
         DOCKER_CRED = 'dockerhub-creds'
         SONAR_TOKEN_CRED = 'sonar-token'
-        SONAR_HOST_URL = 'http://localhost:9000'
+        SONAR_HOST_URL = 'http://host.docker.internal:9000'
     }
 
     stages {
