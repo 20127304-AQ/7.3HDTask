@@ -51,13 +51,19 @@ pipeline {
             }
         }
 
-        stage('Security stage') {
+        stage('Security') {
             steps {
                 withCredentials([usernamePassword(credentialsId: env.DOCKER_CRED, usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
                     bat """
-        REM Scan Docker image with Trivy and export JSON
-        docker run --rm -v //var/run/docker.sock:/var/run/docker.sock aquasec/trivy image ^
-          --severity CRITICAL,HIGH --format json --output trivy_report.json %DOCKER_USER%/7.3hdtask:%BUILD_NUMBER%
+        REM Set absolute workspace path
+        set WORKDIR=%CD%
+
+        REM Scan Docker image with Trivy and export JSON to host directory
+        docker run --rm -v //var/run/docker.sock:/var/run/docker.sock -v "%WORKDIR%:/scan" aquasec/trivy image ^
+          --severity CRITICAL,HIGH --format json --output /scan/trivy_report.json %DOCKER_USER%/7.3hdtask:%BUILD_NUMBER%
+
+        REM Debug: check if file exists
+        dir trivy_report.json
 
         REM Parse JSON to list vulnerabilities using Python (Windows-compatible)
         echo import json > parse_trivy.py
